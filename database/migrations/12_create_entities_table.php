@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('project_label_set', function (Blueprint $table) {
+        Schema::create('entities', function (Blueprint $table) {
             $table->id();
-            $table->boolean('pick_one');
+            $table->string('name')->unique();
             $table->foreignId('project_id')->constrained('projects')
-                ->onDelete('cascade');
-            $table->foreignId('label_set_id')->constrained('label_sets')
                 ->onDelete('cascade');
             $table->timestamps();
         });
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('project_label_set');
+        Schema::dropIfExists('entities');
     }
 };

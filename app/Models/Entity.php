@@ -9,10 +9,25 @@ class Entity extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'project_id'
+    ];
+
+    public function projects()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
     public function sample_texts()
     {
         return $this->belongsToMany(SampleText::class)
             ->using(EntityRecognition::class)->withPivot('start')->withPivot('end')
             ->withTimestamps();
+    }
+
+    public function entity_recognition()
+    {
+        $this->hasMany(EntityRecognition::class);
     }
 }

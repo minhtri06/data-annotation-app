@@ -11,11 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('labeling', function (Blueprint $table) {
+        Schema::create('entity_recognition', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('label_id')->constrained('labels')
+            $table->integer('start');
+            $table->integer('end');
+            $table->foreignId('entity_id')->constrained('entities')
                 ->onDelete('cascade');
-            $table->foreignId('sample_id')->constrained('samples')
+            $table->foreignId('sample_text_id')->constrained('sample_texts')
+                ->onDelete('cascade');
+            $table->foreignId('performer_id')->constrained('users')
                 ->onDelete('cascade');
             $table->timestamps();
         });
@@ -26,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('labeling');
+        Schema::dropIfExists('entity_recognition');
     }
 };

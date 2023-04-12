@@ -15,9 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('description');
-            $table->integer('maximum_performer');
-            $table->foreignId('project_type_id')->constrained('project_types')
-                ->onDelete('cascade');
+            $table->boolean('has_label_sets');
+            $table->boolean('has_entity_recognition');
+            $table->boolean('has_generated_text');
+            $table->integer('number_of_generated_texts')->nullable();
+            $table->integer('maximum_of_generated_texts')->nullable();
+            $table->string('text_titles');
+            $table->integer('number_of_texts')->min(1);
+            $table->string('generated_text_titles'); // text 1, text 2, text 3
+            $table->integer('maximum_performer')->min(1);
             $table->timestamps();
         });
     }

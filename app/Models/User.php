@@ -43,4 +43,19 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function entity_recognition()
+    {
+        return $this->hasMany(EntityRecognition::class, 'performer_id');
+    }
+
+    public function generated_texts()
+    {
+        return $this->hasMany(GeneratedText::class, 'performer_id');
+    }
+
+    public function labeling()
+    {
+        return $this->hasMany(Labeling::class, 'performer_id');
+    }
 }

@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('entities', function (Blueprint $table) {
+        Schema::create('generated_texts', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->text('text');
+            $table->foreignId('sample_id')->constrained('samples')
+                ->onDelete('cascade');
+            $table->foreignId('performer_id')->constrained('users')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -23,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('entities');
+        Schema::dropIfExists('generated_texts');
     }
 };

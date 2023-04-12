@@ -9,6 +9,10 @@ class LabelSet extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'pick_one', 'project_id'
+    ];
+
     public function labels()
     {
         return $this->hasMany(Label::class);
@@ -16,7 +20,6 @@ class LabelSet extends Model
 
     public function projects()
     {
-        return $this->belongsToMany(Project::class, 'project_label_set')
-            ->using(ProjectLabelSet::class)->withPivot('pick_one')->withTimestamps();
+        return $this->belongsTo(Project::class);
     }
 }

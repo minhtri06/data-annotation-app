@@ -9,6 +9,10 @@ class Sample extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'project_id'
+    ];
+
     public function project()
     {
         return $this->belongsTo(Project::class);

@@ -9,6 +9,11 @@ class Label extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'label',
+        'label_set_id',
+    ];
+
     public function label_set()
     {
         return $this->belongsTo(LabelSet::class);

@@ -12,19 +12,25 @@ class Project extends Model
     protected $fillable = [
         'name',
         'description',
+        'has_label_sets',
+        'has_entity_recognition',
+        'has_generated_text',
+        'number_of_generated_texts',
+        'maximum_of_generated_texts',
+        'number_of_texts',
+        'text_titles',
+        'generated_text_titles',
         'maximum_performer',
-        'project_type_id',
     ];
 
-    public function project_type()
+    public function entities()
     {
-        return $this->belongsTo(ProjectType::class);
+        return $this->hasMany(Entity::class);
     }
 
     public function label_sets()
     {
-        return $this->belongsToMany(LabelSet::class, 'project_label_set')
-            ->using(ProjectLabelSet::class)->withPivot('pick_one')->withTimestamps();
+        return $this->hasMany(LabelSet::class);
     }
 
     public function samples()

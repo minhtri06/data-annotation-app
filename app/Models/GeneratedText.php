@@ -9,6 +9,17 @@ class GeneratedText extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'sample_id',
+        'performer_id',
+        'text',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'performer_id');
+    }
+
     public function sample()
     {
         return $this->belongsTo(Sample::class);
