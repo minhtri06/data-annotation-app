@@ -57,6 +57,8 @@ class SeederController extends Controller
             "password" => bcrypt("123123"),
             "role" => "annotator"
         ]);
+
+        return response(['message' => 'Oke']);
     }
 
     public function textClassification()
@@ -135,6 +137,8 @@ class SeederController extends Controller
             'sample_id' => $sample->id,
             'performer_id' => $user_toai->id,
         ]);
+
+        return response(['message' => 'Oke']);
     }
 
     public function machineTranslation()
@@ -174,6 +178,8 @@ class SeederController extends Controller
             'text' => 'Chuối',
             'performer_id' => $user_tuan->id
         ]);
+
+        return response(['message' => 'Oke']);
     }
 
     public function entityRecognition()
@@ -233,5 +239,7 @@ class SeederController extends Controller
             'end' => 17,
             'performer_id' => $user_tri->id
         ]);
+
+        return response(['message' => 'Oke']);
     }
 }

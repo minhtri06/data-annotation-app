@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('maximum_of_generated_texts')->nullable();
             $table->string('text_titles');
             $table->integer('number_of_texts')->min(1);
-            $table->string('generated_text_titles'); // text 1, text 2, text 3
+            $table->string('generated_text_titles')->nullable(); // text 1,text 2,text 3
             $table->integer('maximum_performer')->min(1);
             $table->timestamps();
         });
