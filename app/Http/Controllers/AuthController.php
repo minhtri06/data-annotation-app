@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ApiException;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -17,7 +18,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response(['message' => 'Wrong email or password'], 400);
+            throw ApiException::Unauthorized('Wrong email or password');
         }
 
         $token = $user->createToken('myAppToken', [$user->role])->plainTextToken;
