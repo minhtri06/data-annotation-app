@@ -58,4 +58,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(Labeling::class, 'performer_id');
     }
+
+    public function assignment()
+    {
+        return $this->hasMany(Assignment::class, 'user_id');
+    }
+
+    public function assigned_projects()
+    {
+        return $this->belongsToMany(Project::class, 'assignment')
+            ->using(Assignment::class)->withTimestamps();
+    }
 }
