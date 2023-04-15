@@ -28,7 +28,7 @@ class ProjectServices
         ]);
         if (array_key_exists('label_sets', $fields)) {
             if ($fields['has_label_sets'] == false) {
-                throw ApiException::badRequest("Got 'label_sets' but 'has_label_sets' is false");
+                throw ApiException::BadRequest("Got 'label_sets' but 'has_label_sets' is false");
             }
             $request->validate([
                 'label_sets' => 'array',
@@ -37,13 +37,13 @@ class ProjectServices
                 'label_sets.*.labels.*' => 'required|string',
             ]);
         }
-        if ($fields['entities']) {
+        if (array_key_exists('entities', $fields)) {
             if ($fields['has_entity_recognition'] == false) {
-                throw ApiException::badRequest("Got 'entities' but 'has_entity_recognition' is false");
+                throw ApiException::BadRequest("Got 'entities' but 'has_entity_recognition' is false");
             }
             $request->validate([
                 'entities' => 'array',
-                'entities.*.name' => 'required|string',
+                'entities.*' => 'required|string',
             ]);
         }
         return $fields;
