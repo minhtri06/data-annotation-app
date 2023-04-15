@@ -26,7 +26,7 @@ class ProjectServices
             'label_sets' => 'array|nullable',
             'entities' => 'array|nullable'
         ]);
-        if ($fields['label_sets']) {
+        if (array_key_exists('label_sets', $fields)) {
             if ($fields['has_label_sets'] == false) {
                 throw ApiException::badRequest("Got 'label_sets' but 'has_label_sets' is false");
             }
