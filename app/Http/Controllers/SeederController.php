@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Assignment;
 use App\Models\Entity;
 use App\Models\EntityRecognition;
 use App\Models\GeneratedText;
@@ -64,6 +65,7 @@ class SeederController extends Controller
     public function textClassification()
     {
         $user_toai = User::where('email', 'ngotoai2@email.com')->first();
+        $user_tri = User::where('email', 'hanoinhoem2@email.com')->first();
 
         $project = Project::create([
             'name' => 'Text Classification 1',
@@ -82,6 +84,15 @@ class SeederController extends Controller
             'generated_text_titles' => '',
             //
             'maximum_performer' => 1,
+        ]);
+
+        Assignment::create([
+            'project_id' => $project->id,
+            'user_id' => $user_toai->id
+        ]);
+        Assignment::create([
+            'project_id' => $project->id,
+            'user_id' => $user_tri->id
         ]);
 
         $label_set = LabelSet::create([
@@ -144,6 +155,7 @@ class SeederController extends Controller
     public function machineTranslation()
     {
         $user_tuan = User::where('email', 'tuanrose2@email.com')->first();
+        $user_toai = User::where('email', 'ngotoai2@email.com')->first();
 
         $project = Project::create([
             'name' => 'Machine Translation 1',
@@ -162,6 +174,15 @@ class SeederController extends Controller
             'generated_text_titles' => 'Vietnamese',
             //
             'maximum_performer' => 3,
+        ]);
+
+        Assignment::create([
+            'project_id' => $project->id,
+            'user_id' => $user_tuan->id,
+        ]);
+        Assignment::create([
+            'project_id' => $project->id,
+            'user_id' => $user_toai->id,
         ]);
 
         $sample = Sample::create([
@@ -185,6 +206,7 @@ class SeederController extends Controller
     public function entityRecognition()
     {
         $user_tri = User::where('email', 'hanoinhoem2@email.com')->first();
+        $user_tuan = User::where('email', 'tuanrose2@email.com')->first();
 
         $project = Project::create([
             'name' => 'Entity Recognition 1',
@@ -203,6 +225,15 @@ class SeederController extends Controller
             'generated_text_titles' => '',
             //
             'maximum_performer' => 1,
+        ]);
+
+        Assignment::create([
+            'project_id' => $project->id,
+            'user_id' => $user_tri->id,
+        ]);
+        Assignment::create([
+            'project_id' => $project->id,
+            'user_id' => $user_tuan->id,
         ]);
 
         $entity_cat = Entity::create([

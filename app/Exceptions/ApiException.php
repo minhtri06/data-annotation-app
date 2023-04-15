@@ -15,4 +15,9 @@ class ApiException extends Exception
     {
         return new self($message, 404);
     }
+
+    public static function Unauthorized($message = "Unauthorized")
+    {
+        return new self($message, 401);
+    }
 }

@@ -37,4 +37,15 @@ class Project extends Model
     {
         return $this->hasMany(Sample::class);
     }
+
+    public function assignment()
+    {
+        return $this->hasMany(Assignment::class, 'project_id');
+    }
+
+    public function assigned_users()
+    {
+        return $this->belongsToMany(User::class, 'assignment')
+            ->using(Assignment::class)->withTimestamps();
+    }
 }

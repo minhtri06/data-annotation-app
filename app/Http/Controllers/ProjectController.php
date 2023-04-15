@@ -29,7 +29,7 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
         $fields = ProjectServices::validateNewProjectFromRequest($request);
-
+        return $fields;
         ['label sets' => $label_sets, 'entities' => $entities] = $fields;
 
         $new_project = Project::create($fields);
