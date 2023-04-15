@@ -2,9 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ApiException;
 use Illuminate\Http\Request;
 
+use App\Services\ProjectServices;
+
+use App\Models\Label;
+use App\Models\LabelSet;
 use App\Models\Project;
+use Exception;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class ProjectController extends Controller
 {
@@ -21,22 +28,32 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        $fields = $request->validate([
-            'name' => 'required|string',
-            'description' => 'string',
-            'has_label_sets' => 'required|boolean',
-            'has_entity_recognition' => 'required|boolean',
-            'number_of_texts' => 'required|integer',
-            'text_titles' => 'required|string',
-            'has_generated_text' => 'required|boolean',
-            'number_of_generated_texts' => 'integer|nullable',
-            'maximum_of_generated_texts' => 'integer|nullable',
-            'generated_text_titles' => 'string|nullable',
-            'maximum_performer' => 'required|integer',
-        ]);
-        $project = Project::create($fields);
-        return $request;
-        return response(201, ['data' => ['project' => $project]]);
+        $fields = ProjectServices::validateNewProjectFromRequest($request);
+
+        ['label sets' => $label_sets, 'entities' => $entities] = $fields;
+
+        $new_project = Project::create($fields);
+
+        if ($label_sets) {
+            foreach ($label_sets as $label_set) {
+                [$pick_one, $labels] = $label_set;
+
+                $new_label_set = LabelSet::create([
+                    'pick_one' => $pick_one,
+                    'project_id' => $new_project->id
+                ]);
+
+                if ($labels) {
+                    foreach ($labels as $label) {
+                        Label::create([
+                            'label' => $label, 'label set id' => $new_label_set->id
+                        ]);
+                    }
+                }
+            }
+        }
+        return 'not yolo';
+        // return response(['data' => ['project' => $project]], 201);
     }
 
     /**

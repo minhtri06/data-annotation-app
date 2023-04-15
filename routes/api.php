@@ -1,9 +1,5 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\SeederController;
 use App\Http\Middleware\ConvertRequestFieldsToSnakeCase;
 use App\Http\Middleware\ConvertResponseFieldsToCamelCase;
 use Illuminate\Http\Request;
