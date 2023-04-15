@@ -52,6 +52,24 @@ class ProjectController extends Controller
                 }
             }
         }
+        if ($entities) {
+            foreach ($entities as $entity) {
+                [$pick_one, $labels] = $label_set;
+
+                $new_label_set = LabelSet::create([
+                    'pick_one' => $pick_one,
+                    'project_id' => $new_project->id
+                ]);
+
+                if ($labels) {
+                    foreach ($labels as $label) {
+                        Label::create([
+                            'label' => $label, 'label set id' => $new_label_set->id
+                        ]);
+                    }
+                }
+            }
+        }
         return 'not yolo';
         // return response(['data' => ['project' => $project]], 201);
     }

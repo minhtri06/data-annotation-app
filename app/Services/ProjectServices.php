@@ -16,7 +16,7 @@ class ProjectServices
             'description' => 'string',
             'has_label_sets' => 'required|boolean',
             'has_entity_recognition' => 'required|boolean',
-            'number_of_texts' => 'required|integer',
+            'number_of_texts' => 'required|integer|min:1',
             'text_titles' => 'required|string',
             'has_generated_text' => 'required|boolean',
             'number_of_generated_texts' => 'integer|nullable',
@@ -35,6 +35,15 @@ class ProjectServices
                 'label_sets.*.pick_one' => 'required|boolean',
                 'label_sets.*.labels' => 'required|array',
                 'label_sets.*.labels.*' => 'required|string',
+            ]);
+        }
+        if ($fields['entities']) {
+            if ($fields['has_entity_recognition'] == false) {
+                throw ApiException::badRequest("Got 'entities' but 'has_entity_recognition' is false");
+            }
+            $request->validate([
+                'entities' => 'array',
+                'entities.*.name' => 'required|string',
             ]);
         }
         return $fields;
