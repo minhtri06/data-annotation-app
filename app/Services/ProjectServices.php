@@ -26,17 +26,16 @@ class ProjectServices
             'label_sets' => 'array|nullable',
             'entities' => 'array|nullable'
         ]);
-        if (
-            array_key_exists('label_sets', $fields) && !$fields['has_label_sets']
-        ) {
-            throw ApiException::badRequest(
-                "Got 'label_sets' in request but 'has_label_sets' is false"
-            );
-        }
-        if (array_key_exists('entities', $fields) && !$fields['has_entity_recognition']) {
-            throw ApiException::badRequest(
-                "Got 'entities' in request but 'has_entity_recognition' is false"
-            );
+        if ($fields['label_sets']) {
+            if ($fields['has_label_sets'] == false) {
+                throw ApiException::badRequest("Got 'label_sets' but 'has_label_sets' is false");
+            }
+            $request->validate([
+                'label_sets' => 'array',
+                'label_sets.*.pick_one' => 'required|boolean',
+                'label_sets.*.labels' => 'required|array',
+                'label_sets.*.labels.*' => 'required|string',
+            ]);
         }
         return $fields;
     }
