@@ -24,7 +24,8 @@ class ProjectServices
             'generated_text_titles' => 'string|nullable',
             'maximum_performer' => 'required|integer',
             'label_sets' => 'array|nullable',
-            'entities' => 'array|nullable'
+            'entities' => 'array|nullable',
+            'project_type_id' => 'required|integer'
         ]);
         if (array_key_exists('label_sets', $fields)) {
             if ($fields['has_label_sets'] == false) {

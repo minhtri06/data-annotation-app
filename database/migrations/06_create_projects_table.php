@@ -24,6 +24,8 @@ return new class extends Migration
             $table->integer('number_of_texts')->min(1);
             $table->string('generated_text_titles')->nullable(); // text 1,text 2,text 3
             $table->integer('maximum_performer')->min(1);
+            $table->foreignId('project_type_id')->constrained('project_types')
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }

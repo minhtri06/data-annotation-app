@@ -32,7 +32,7 @@ class ConvertResponseFieldsToCamelCase
 
         try {
             $json = json_decode($content, true);
-            if ($json) {
+            if (is_array($json)) {
                 $response->setContent(
                     json_encode($this->convertArrayKeysToCamelCase($json))
                 );
