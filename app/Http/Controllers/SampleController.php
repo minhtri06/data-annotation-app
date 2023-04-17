@@ -13,7 +13,7 @@ class SampleController extends Controller
     public function index()
     {
         $samples = Sample::all();
-        return response(['data'=> ['samples'=>$samples]]);
+        return response(['samples' => $samples]);
     }
 
     /**

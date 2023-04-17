@@ -3,4 +3,5 @@
 use App\Http\Controllers\SampleController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [SampleController::class, 'index']);
+Route::middleware(['auth:sanctum', 'abilities:manager'])
+    ->get('/', [SampleController::class, 'index']);
