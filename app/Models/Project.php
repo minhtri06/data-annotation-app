@@ -21,7 +21,13 @@ class Project extends Model
         'text_titles',
         'generated_text_titles',
         'maximum_performer',
+        'project_type_id'
     ];
+
+    public function project_type()
+    {
+        return $this->belongsTo(ProjectType::class);
+    }
 
     public function entities()
     {

@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\ConvertRequestFieldsToSnakeCase;
 use App\Http\Middleware\ConvertResponseFieldsToCamelCase;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,7 +18,12 @@ Route::middleware([
     Route::prefix('/seeders')->group(base_path('routes/api/seeders.php'));
 });
 
-Route::middleware([ConvertRequestFieldsToSnakeCase::class, ConvertResponseFieldsToCamelCase::class])
+Route::middleware([
+    ConvertRequestFieldsToSnakeCase::class,
+    ConvertResponseFieldsToCamelCase::class,
+    'auth:sanctum'
+])
     ->get('/test', function (Request $request) {
-        return 'asdfadfdsaf';
+        $project = Project::with('assignment')->find(1);
+        return $project;
     });

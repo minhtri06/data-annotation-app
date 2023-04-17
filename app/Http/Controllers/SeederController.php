@@ -13,8 +13,10 @@ use Illuminate\Http\Request;
 
 use App\Models\User;
 use App\Models\Project;
+use App\Models\ProjectType;
 use App\Models\Sample;
 use App\Models\SampleText;
+use PhpParser\Node\Expr\FuncCall;
 
 use function PHPUnit\Framework\returnSelf;
 
@@ -62,6 +64,16 @@ class SeederController extends Controller
         return response(['message' => 'Oke']);
     }
 
+    public function projectTypes()
+    {
+        ProjectType::create(['name' => 'Text Classification']);
+        ProjectType::create(['name' => 'Machine Translation']);
+        ProjectType::create(['name' => 'Entity Recognition']);
+        ProjectType::create(['name' => 'Q&A Evaluation']);
+
+        return response(['message' => 'Oke']);
+    }
+
     public function textClassification()
     {
         $user_toai = User::where('email', 'ngotoai2@email.com')->first();
@@ -84,6 +96,7 @@ class SeederController extends Controller
             'generated_text_titles' => '',
             //
             'maximum_performer' => 1,
+            'project_type_id' => 1,
         ]);
 
         Assignment::create([
@@ -174,6 +187,7 @@ class SeederController extends Controller
             'generated_text_titles' => 'Vietnamese',
             //
             'maximum_performer' => 3,
+            'project_type_id' => 2,
         ]);
 
         Assignment::create([
@@ -225,6 +239,7 @@ class SeederController extends Controller
             'generated_text_titles' => '',
             //
             'maximum_performer' => 1,
+            'project_type_id' => 3,
         ]);
 
         Assignment::create([
