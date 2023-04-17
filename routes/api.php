@@ -14,6 +14,7 @@ Route::middleware([
     Route::prefix('/users')->group(base_path('routes/api/users.php'));
     Route::prefix('/me')->middleware('auth:sanctum')->group(base_path('routes/api/me.php'));
     Route::prefix('/projects')->group(base_path('routes/api/projects.php'));
+    Route::prefix('/samples')->group(base_path('routes/api/samples.php'));
     Route::prefix('/seeders')->group(base_path('routes/api/seeders.php'));
 });
 
