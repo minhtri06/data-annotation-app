@@ -23,6 +23,11 @@ class Project extends Model
         'maximum_performer',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     public function entities()
     {
         return $this->hasMany(Entity::class);

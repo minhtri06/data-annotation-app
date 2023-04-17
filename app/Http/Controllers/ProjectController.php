@@ -11,6 +11,8 @@ use App\Services\ProjectServices;
 use App\Models\Label;
 use App\Models\LabelSet;
 use App\Models\Project;
+use App\Models\Assignment;
+use App\Models\Sample;
 use Exception;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
@@ -21,7 +23,7 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        return Project::all();
+        return response(['projects' => Project::all()], 200);
     }
 
     /**
@@ -68,14 +70,35 @@ class ProjectController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, Request $request)
     {
-        $project = Project::find($id);
 
-        if (!$project) {
-            return ApiException::NotFound();
+        /** @var \App\Models\User $user **/
+        $user = auth()->user();
+        // return [$user->id];
+
+        if ($request->query()['with_samples'] ?? null) {
+            $withs[] = 'samples';
         }
-        return $project;
+        if (($request->query()['with_assigned_users'] ?? null) &&
+            ($user->role == 'admin' || $user->role == 'manager')
+        ) {
+            $withs[] = 'assigned_users';
+        }
+
+        $project = Project::with($withs)->find($id);
+
+        if ($project == null) {
+            throw ApiException::NotFound("Project not found");
+        }
+
+        if ($user->role == 'annotator') {
+            if (Assignment::where(['user_id' => $user->id, 'project_id' => $project->id])->first() == null) {
+                throw ApiException::NotFound("Project not found");
+            }
+        }
+
+        return response(['project' => $project], 200);
     }
 
     /**
@@ -93,9 +116,12 @@ class ProjectController extends Controller
     {
         $project = Project::find($id);
 
-        if ($project) {
-            return ApiException::NotFound();
+        if ($project == null) {
+            throw ApiException::NotFound("Project not found");
         }
-        return $project;
+
+        Project::destroy($project->id);
+
+        return response(['project' => $project], 200);
     }
 }
