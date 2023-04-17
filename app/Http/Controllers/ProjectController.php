@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ApiException;
+use App\Models\Entity;
 use Illuminate\Http\Request;
 
 use App\Services\ProjectServices;
@@ -29,31 +30,39 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
         $fields = ProjectServices::validateNewProjectFromRequest($request);
-        return $fields;
-        ['label sets' => $label_sets, 'entities' => $entities] = $fields;
 
+        // ['label_sets' => $label_sets, 'entities' => $entities] = $fields;
+        // return [$label_sets, $entities];
         $new_project = Project::create($fields);
 
-        if ($label_sets) {
+        if ($fields['label_sets'] ?? null) {
+            $label_sets = $fields['label_sets'];
             foreach ($label_sets as $label_set) {
-                [$pick_one, $labels] = $label_set;
+                ['pick_one' => $pick_one, 'labels' => $labels] = $label_set;
 
                 $new_label_set = LabelSet::create([
                     'pick_one' => $pick_one,
                     'project_id' => $new_project->id
                 ]);
 
-                if ($labels) {
-                    foreach ($labels as $label) {
-                        Label::create([
-                            'label' => $label, 'label set id' => $new_label_set->id
-                        ]);
-                    }
+                foreach ($labels as $label) {
+                    Label::create([
+                        'label' => $label, 'label_set_id' => $new_label_set->id
+                    ]);
                 }
             }
         }
-        return 'not yolo';
-        // return response(['data' => ['project' => $project]], 201);
+        if ($fields['entities'] ?? null) {
+            $entities = $fields['entities'];
+            foreach ($entities as $entity) {
+
+                Entity::create([
+                    'name' => $entity,
+                    'project_id' => $new_project->id
+                ]);
+            }
+        }
+        return response(['data' => ['project' => $new_project]], 201);
     }
 
     /**
@@ -61,7 +70,12 @@ class ProjectController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $project = Project::find($id);
+
+        if (!$project) {
+            return ApiException::NotFound();
+        }
+        return $project;
     }
 
     /**
@@ -77,6 +91,11 @@ class ProjectController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $project = Project::find($id);
+
+        if ($project) {
+            return ApiException::NotFound();
+        }
+        return $project;
     }
 }

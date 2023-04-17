@@ -6,7 +6,7 @@ use Exception;
 
 class ApiException extends Exception
 {
-    public static function badRequest($message = "Bad request")
+    public static function BadRequest($message = "Bad request")
     {
         return new self($message, 400);
     }
@@ -19,5 +19,10 @@ class ApiException extends Exception
     public static function Unauthorized($message = "Unauthorized")
     {
         return new self($message, 401);
+    }
+
+    public static function ResponseStatus($implement = "", $message = " Succesfully!")
+    {
+        return new self($implement + $message, 200);
     }
 }
