@@ -13,6 +13,11 @@ class Sample extends Model
         'project_id'
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     public function project()
     {
         return $this->belongsTo(Project::class);

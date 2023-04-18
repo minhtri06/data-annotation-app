@@ -13,6 +13,11 @@ class LabelSet extends Model
         'pick_one', 'project_id'
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     public function labels()
     {
         return $this->hasMany(Label::class);

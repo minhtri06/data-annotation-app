@@ -7,11 +7,11 @@ use Illuminate\Http\Request;
 
 use App\Models\Project;
 
-class ProjectServices
+class ProjectService
 {
     static function validateNewProjectFromRequest(Request $request)
     {
-        $fields = $request->validate([
+        $project_body = $request->validate([
             'name' => 'required|string',
             'description' => 'string',
             'has_label_sets' => 'required|boolean',
@@ -27,8 +27,8 @@ class ProjectServices
             'entities' => 'array|nullable',
             'project_type_id' => 'required|integer'
         ]);
-        if (array_key_exists('label_sets', $fields)) {
-            if ($fields['has_label_sets'] == false) {
+        if (array_key_exists('label_sets', $project_body)) {
+            if ($project_body['has_label_sets'] == false) {
                 throw ApiException::BadRequest("Got 'label_sets' but 'has_label_sets' is false");
             }
             $request->validate([
@@ -38,15 +38,38 @@ class ProjectServices
                 'label_sets.*.labels.*' => 'required|string',
             ]);
         }
-        if (array_key_exists('entities', $fields)) {
-            if ($fields['has_entity_recognition'] == false) {
+        if (array_key_exists('entities', $project_body)) {
+            if ($project_body['has_entity_recognition'] == false) {
                 throw ApiException::BadRequest("Got 'entities' but 'has_entity_recognition' is false");
             }
             $request->validate([
                 'entities' => 'array',
-                'entities.*' => 'required|string',
+                'entities.*.name' => 'required|string',
             ]);
         }
-        return $fields;
+        return $project_body;
+    }
+
+    /**
+     * Create a project
+     * (Assume the fields is correctly formatted)
+     */
+    static public function createProject($project_body)
+    {
+        $new_project = Project::create($project_body);
+
+        if ($project_body['label_sets'] ?? null) {
+            $new_project['label_sets'] = LabelSetService::createLabelSetsOfProject(
+                $new_project->id,
+                $project_body['label_sets']
+            );
+        }
+        if ($project_body['entities'] ?? null) {
+            $new_project['entities'] = EntityService::createEntitiesOfProject(
+                $new_project->id,
+                $project_body['entities']
+            );
+        }
+        return $new_project;
     }
 }

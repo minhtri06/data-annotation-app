@@ -14,6 +14,11 @@ class Entity extends Model
         'project_id'
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     public function projects()
     {
         return $this->belongsTo(Project::class);

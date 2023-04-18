@@ -14,6 +14,11 @@ class EntityRecognition extends Pivot
         'performer_id',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     public function user()
     {
         $this->belongsTo(User::class, 'performer_id');

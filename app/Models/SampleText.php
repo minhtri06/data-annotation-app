@@ -15,6 +15,11 @@ class SampleText extends Model
         'sample_id',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     public function sample()
     {
         return $this->belongsTo(Sample::class);

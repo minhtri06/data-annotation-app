@@ -14,6 +14,11 @@ class Label extends Model
         'label_set_id',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     public function label_set()
     {
         return $this->belongsTo(LabelSet::class);
