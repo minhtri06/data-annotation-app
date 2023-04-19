@@ -21,8 +21,8 @@ class ApiException extends Exception
         return new self($message, 401);
     }
 
-    public static function ResponseStatus($implement = "", $message = " Succesfully!")
+    public static function Forbidden($message = "Forbidden")
     {
-        return new self($implement + $message, 200);
+        return new self($message, 403);
     }
 }

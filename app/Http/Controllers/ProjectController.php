@@ -13,6 +13,7 @@ use App\Models\LabelSet;
 use App\Models\Project;
 use App\Models\Assignment;
 use App\Models\Sample;
+use App\Validation\ProjectValidation;
 use Exception;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
@@ -21,9 +22,16 @@ class ProjectController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response(['projects' => Project::all()], 200);
+        /** @var \App\Models\User $user **/
+        $user = auth()->user();
+
+        $query = ProjectValidation::index($request);
+
+        $projects = ProjectService::getProject($query, $user);
+
+        return response(['project' => $projects], 200);
     }
 
     /**
@@ -31,7 +39,7 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        $project_body = ProjectService::validateNewProjectFromRequest($request);
+        $project_body = ProjectValidation::store($request);
 
         $new_project = ProjectService::createProject($project_body);
         return response(['project' => $new_project], 201);
@@ -40,56 +48,38 @@ class ProjectController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id, Request $request)
+    public function show(Request $request, $id)
     {
-
         /** @var \App\Models\User $user **/
         $user = auth()->user();
 
-        if ($request->query()['with_samples'] ?? null) {
-            $withs[] = 'samples';
-        }
-        if (($request->query()['with_assigned_users'] ?? null) &&
-            ($user->role == 'admin' || $user->role == 'manager')
-        ) {
-            $withs[] = 'assigned_users';
-        }
+        $query = ProjectValidation::show($request);
+        $query['id'] = $id;
 
-        $project = Project::with($withs)->find($id);
-
-        if ($project == null) {
-            throw ApiException::NotFound("Project not found");
+        $project = ProjectService::getProject($query, $user);
+        if (count($project) == 0) {
+            throw ApiException::NotFound('Project not found');
         }
-
-        if ($user->role == 'annotator') {
-            if (Assignment::where(['user_id' => $user->id, 'project_id' => $project->id])->first() == null) {
-                throw ApiException::NotFound("Project not found");
-            }
-        }
-
-        return response(['project' => $project], 200);
+        return response(['project' => $project[0]], 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $project_body = ProjectValidation::update($request);
+
+        $update_project = ProjectService::updateProject($id, $project_body);
+        return response(['project' => $update_project], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        $project = Project::find($id);
-
-        if ($project == null) {
-            throw ApiException::NotFound("Project not found");
-        }
-
-        Project::destroy($project->id);
+        $project = ProjectService::deleteProject($id);
 
         return response(['project' => $project], 200);
     }
