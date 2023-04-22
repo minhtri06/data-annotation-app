@@ -58,11 +58,10 @@ class ProjectValidation
     static function update(Request $request)
     {
         $project_body = $request->validate([
-            'name' => 'string',
-            'description' => 'string',
-            'text_titles' => 'string',
+            'name' => 'string|nullable',
+            'description' => 'string|nullable',
+            'text_titles' => 'string|nullable',
             'generated_text_titles' => 'string|nullable',
-
             'maximum_performer' => 'integer|min:0',
         ]);
         return $project_body;
