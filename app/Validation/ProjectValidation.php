@@ -74,4 +74,12 @@ class ProjectValidation
             'with_assigned_users' => 'boolean'
         ]);
     }
+
+    static function assignUsersToProject(Request $request)
+    {
+        return $request->validate([
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'required|integer'
+        ]);
+    }
 }

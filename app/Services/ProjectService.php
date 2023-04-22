@@ -3,14 +3,25 @@
 namespace App\Services;
 
 use App\Exceptions\ApiException;
-
 use App\Models\Project;
-use App\Models\Sample;
-use Exception;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use App\Models\User;
+use \Illuminate\Database\QueryException;
 
 class ProjectService
 {
+    static public function assignUsersToProject($project_id, $user_ids)
+    {
+        $project = Project::find($project_id);
+        if ($project == null) {
+            throw ApiException::NotFound("Project not found");
+        }
+        try {
+            $project->assigned_users()->attach($user_ids);
+        } catch (QueryException $exception) {
+            throw ApiException::BadRequest($exception->errorInfo[2]);
+        }
+    }
+
     /**
      * Create a project
      * (Assume the fields is correctly formatted)
@@ -78,17 +89,13 @@ class ProjectService
             $project_query->where('project_type_id', $query_options['project_type_id']);
         }
 
-        if (array_key_exists('with_samples', $query_options)) {
-            $project_query->with('samples', function ($query) {
-                $query->take(10);
-            });
-        }
         if (
             (array_key_exists('with_assigned_users', $query_options)) &&
             ($user->role == 'manager' || $user->role == 'admin')
         ) {
             $project_query->with('assigned_users');
         }
+
         if ($user->role == 'annotator') {
             $project_query->whereHas('assignment', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -96,6 +103,16 @@ class ProjectService
         }
 
         return $project_query->get();
+    }
+
+    static public function getUnassignUsersOfProject($project_id)
+    {
+        return User::whereDoesntHave(
+            'assignment',
+            function ($query) use ($project_id) {
+                $query->where('project_id', $project_id);
+            }
+        )->get();
     }
 
     static public function updateProject($id, $update_body)
@@ -127,8 +144,7 @@ class ProjectService
         if ($project == null) {
             throw ApiException::NotFound('Project not found');
         }
-        Project::destroy($project->id);
 
-        return $project;
+        $project->delete();
     }
 }

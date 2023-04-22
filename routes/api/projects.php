@@ -15,3 +15,13 @@ Route::middleware(['auth:sanctum', 'ability:manager,admin'])
 
 Route::middleware(['auth:sanctum', 'ability:manager,admin'])
     ->delete('/{id}', [ProjectController::class, 'destroy']);
+
+Route::middleware(['auth:sanctum', 'ability:manager,admin'])
+    ->post('/{id}/assignment', [ProjectController::class, 'assignUsersToProject']);
+
+
+Route::middleware(['auth:sanctum', 'ability:manager,admin'])
+    ->get(
+        '/{id}/un-assignment',
+        [ProjectController::class, 'getUnassignedUsers']
+    );

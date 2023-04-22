@@ -3,19 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\ApiException;
-use App\Models\Entity;
 use Illuminate\Http\Request;
 
-use App\Services\ProjectService;
+use App\Services\ProjectService as Service;
 
-use App\Models\Label;
-use App\Models\LabelSet;
-use App\Models\Project;
-use App\Models\Assignment;
-use App\Models\Sample;
-use App\Validation\ProjectValidation;
-use Exception;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use App\Validation\ProjectValidation as Validation;
 
 class ProjectController extends Controller
 {
@@ -26,11 +18,8 @@ class ProjectController extends Controller
     {
         /** @var \App\Models\User $user **/
         $user = auth()->user();
-
-        $query = ProjectValidation::index($request);
-
-        $projects = ProjectService::getProjects($query, $user);
-
+        $query = Validation::index($request);
+        $projects = Service::getProjects($query, $user);
         return response(['project' => $projects], 200);
     }
 
@@ -39,9 +28,8 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        $project_body = ProjectValidation::store($request);
-
-        $new_project = ProjectService::createProject($project_body);
+        $project_body = Validation::store($request);
+        $new_project = Service::createProject($project_body);
         return response(['project' => $new_project], 201);
     }
 
@@ -52,10 +40,8 @@ class ProjectController extends Controller
     {
         /** @var \App\Models\User $user **/
         $user = auth()->user();
-
-        $query = ProjectValidation::show($request);
-
-        $project = ProjectService::getProjectById($id, $query, $user);
+        $query = Validation::show($request);
+        $project = Service::getProjectById($id, $query, $user);
         return response(['project' => $project]);
     }
 
@@ -64,9 +50,8 @@ class ProjectController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $project_body = ProjectValidation::update($request);
-
-        $update_project = ProjectService::updateProject($id, $project_body);
+        $project_body = Validation::update($request);
+        $update_project = Service::updateProject($id, $project_body);
         return response(['project' => $update_project], 200);
     }
 
@@ -75,8 +60,19 @@ class ProjectController extends Controller
      */
     public function destroy($id)
     {
-        $project = ProjectService::deleteProject($id);
+        Service::deleteProject($id);
+        return response(['message' => "Delete project successfully"]);
+    }
 
-        return response(['project' => $project], 200);
+    public function assignUsersToProject(Request $request, $project_id)
+    {
+        $fields = Validation::assignUsersToProject($request);
+        Service::assignUsersToProject($project_id, $fields['user_ids']);
+    }
+
+    public function getUnassignedUsers($project_id)
+    {
+        $unassignedUsers = Service::getUnassignUsersOfProject($project_id);
+        return response(['unassigned_users' => $unassignedUsers]);
     }
 }
