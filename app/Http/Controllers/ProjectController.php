@@ -29,7 +29,7 @@ class ProjectController extends Controller
 
         $query = ProjectValidation::index($request);
 
-        $projects = ProjectService::getProject($query, $user);
+        $projects = ProjectService::getProjects($query, $user);
 
         return response(['project' => $projects], 200);
     }
@@ -54,13 +54,9 @@ class ProjectController extends Controller
         $user = auth()->user();
 
         $query = ProjectValidation::show($request);
-        $query['id'] = $id;
 
-        $project = ProjectService::getProject($query, $user);
-        if (count($project) == 0) {
-            throw ApiException::NotFound('Project not found');
-        }
-        return response(['project' => $project[0]], 200);
+        $project = ProjectService::getProjectById($id, $query, $user);
+        return response(['project' => $project]);
     }
 
     /**

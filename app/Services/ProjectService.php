@@ -34,18 +34,50 @@ class ProjectService
         return $new_project;
     }
 
-    static public function getProject($query_options, $user)
+    static public function getProjectById($id, $query_options, $user)
+    {
+        $project_query = Project::query();
+
+        if (array_key_exists('with_samples', $query_options)) {
+            $project_query->with('samples', function ($query) {
+                $query->take(10);
+            });
+        }
+
+        if (
+            (array_key_exists('with_assigned_users', $query_options)) &&
+            ($user->role == 'manager' || $user->role == 'admin')
+        ) {
+            $project_query->with('assigned_users');
+        }
+
+        if ($user->role == 'annotator') {
+            $project_query->whereHas('assignment', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            });
+        }
+
+        $project_query->with('label_sets', 'label_sets.labels');
+
+        $project = $project_query->find($id);
+        if ($project == null) {
+            throw ApiException::NotFound("Project not found");
+        }
+        return $project;
+    }
+
+    static public function getProjects($query_options, $user)
     {
         $project_query = Project::query();
 
         if (array_key_exists('project_type_id', $query_options)) {
             $project_query->where('project_type_id', $query_options['project_type_id']);
         }
-        if (array_key_exists('id', $query_options)) {
-            $project_query->where('id', $query_options['id']);
-        }
+
         if (array_key_exists('with_samples', $query_options)) {
-            $project_query->with('samples');
+            $project_query->with('samples', function ($query) {
+                $query->take(10);
+            });
         }
         if (
             (array_key_exists('with_assigned_users', $query_options)) &&
