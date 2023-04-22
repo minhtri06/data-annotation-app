@@ -17,6 +17,7 @@ Route::middleware([
     Route::prefix('/projects')->group(base_path('routes/api/projects.php'));
     Route::prefix('/samples')->group(base_path('routes/api/samples.php'));
     Route::prefix('/seeders')->group(base_path('routes/api/seeders.php'));
+    Route::prefix('/project-types')->group(base_path('routes/api/project-types.php'));
 });
 
 Route::middleware([

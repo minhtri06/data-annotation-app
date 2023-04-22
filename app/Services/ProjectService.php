@@ -3,53 +3,14 @@
 namespace App\Services;
 
 use App\Exceptions\ApiException;
-use Illuminate\Http\Request;
 
 use App\Models\Project;
+use App\Models\Sample;
+use Exception;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class ProjectService
 {
-    static function validateNewProjectFromRequest(Request $request)
-    {
-        $project_body = $request->validate([
-            'name' => 'required|string',
-            'description' => 'string',
-            'has_label_sets' => 'required|boolean',
-            'has_entity_recognition' => 'required|boolean',
-            'number_of_texts' => 'required|integer|min:1',
-            'text_titles' => 'required|string',
-            'has_generated_text' => 'required|boolean',
-            'number_of_generated_texts' => 'integer|nullable',
-            'maximum_of_generated_texts' => 'integer|nullable',
-            'generated_text_titles' => 'string|nullable',
-            'maximum_performer' => 'required|integer',
-            'label_sets' => 'array|nullable',
-            'entities' => 'array|nullable',
-            'project_type_id' => 'required|integer'
-        ]);
-        if (array_key_exists('label_sets', $project_body)) {
-            if ($project_body['has_label_sets'] == false) {
-                throw ApiException::BadRequest("Got 'label_sets' but 'has_label_sets' is false");
-            }
-            $request->validate([
-                'label_sets' => 'array',
-                'label_sets.*.pick_one' => 'required|boolean',
-                'label_sets.*.labels' => 'required|array',
-                'label_sets.*.labels.*' => 'required|string',
-            ]);
-        }
-        if (array_key_exists('entities', $project_body)) {
-            if ($project_body['has_entity_recognition'] == false) {
-                throw ApiException::BadRequest("Got 'entities' but 'has_entity_recognition' is false");
-            }
-            $request->validate([
-                'entities' => 'array',
-                'entities.*.name' => 'required|string',
-            ]);
-        }
-        return $project_body;
-    }
-
     /**
      * Create a project
      * (Assume the fields is correctly formatted)
@@ -71,5 +32,105 @@ class ProjectService
             );
         }
         return $new_project;
+    }
+
+    static public function getProjectById($id, $query_options, $user)
+    {
+        $project_query = Project::query();
+
+        if (array_key_exists('with_samples', $query_options)) {
+            $project_query->with('samples', function ($query) {
+                $query->take(10);
+            });
+        }
+
+        if (
+            (array_key_exists('with_assigned_users', $query_options)) &&
+            ($user->role == 'manager' || $user->role == 'admin')
+        ) {
+            $project_query->with('assigned_users');
+        }
+
+        if ($user->role == 'annotator') {
+            $project_query->whereHas('assignment', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            });
+        }
+
+        $project = $project_query->find($id);
+        if ($project == null) {
+            throw ApiException::NotFound("Project not found");
+        }
+
+        if ($project->has_label_sets) {
+            $project_query->with('label_sets', 'label_sets.labels');
+        }
+        if ($project->has_entity_recognition) {
+            $project_query->with('entities');
+        }
+
+        return $project_query->find($id);
+    }
+
+    static public function getProjects($query_options, $user)
+    {
+        $project_query = Project::query();
+
+        if (array_key_exists('project_type_id', $query_options)) {
+            $project_query->where('project_type_id', $query_options['project_type_id']);
+        }
+
+        if (array_key_exists('with_samples', $query_options)) {
+            $project_query->with('samples', function ($query) {
+                $query->take(10);
+            });
+        }
+        if (
+            (array_key_exists('with_assigned_users', $query_options)) &&
+            ($user->role == 'manager' || $user->role == 'admin')
+        ) {
+            $project_query->with('assigned_users');
+        }
+        if ($user->role == 'annotator') {
+            $project_query->whereHas('assignment', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            });
+        }
+
+        return $project_query->get();
+    }
+
+    static public function updateProject($id, $update_body)
+    {
+        $project = Project::find($id);
+
+        if ($project == null) {
+            throw ApiException::NotFound('Project not found');
+        }
+
+        if (array_key_exists('maximum_performer', $update_body)) {
+            if ($project->samples->max('number_of_performer') > $update_body['maximum_performer']) {
+                throw ApiException::BadRequest(
+                    "number_of_performer > maximum_performer! Please check again"
+                );
+            }
+        }
+
+        $project->update($update_body);
+        $project->save();
+
+        return $project;
+    }
+
+    static public function deleteProject($id)
+    {
+        $project = Project::find($id);
+
+        if ($project == null) {
+            throw ApiException::NotFound('Project not found');
+        }
+        Project::destroy($project->id);
+
+        return $project;
     }
 }
