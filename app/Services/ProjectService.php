@@ -65,6 +65,9 @@ class ProjectService
         if ($project->has_label_sets) {
             $project_query->with('label_sets', 'label_sets.labels');
         }
+        if ($project->has_entity_recognition) {
+            $project_query->with('entities');
+        }
 
         return $project_query->find($id);
     }
