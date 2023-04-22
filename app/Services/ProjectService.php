@@ -57,13 +57,16 @@ class ProjectService
             });
         }
 
-        $project_query->with('label_sets', 'label_sets.labels');
-
         $project = $project_query->find($id);
         if ($project == null) {
             throw ApiException::NotFound("Project not found");
         }
-        return $project;
+
+        if ($project->has_label_sets) {
+            $project_query->with('label_sets', 'label_sets.labels');
+        }
+
+        return $project_query->find($id);
     }
 
     static public function getProjects($query_options, $user)
