@@ -22,6 +22,7 @@ class ProjectTypeService
         if ($project_type == null) {
             throw ApiException::NotFound("Project type not found");
         }
+        return $project_type;
     }
 
     static public function createProjectType($project_type_body)
@@ -58,11 +59,11 @@ class ProjectTypeService
         }
 
         if (count($project_type->projects) != 0) {
-            throw ApiException::BadRequest("Can not delete project type because it have projects");
+            throw ApiException::BadRequest(
+                "Can not delete project type because it has projects"
+            );
         }
 
-        $project_type->destroy();
-
-        return $project_type;
+        $project_type->delete();
     }
 }

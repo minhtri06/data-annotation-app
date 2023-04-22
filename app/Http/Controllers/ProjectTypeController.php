@@ -27,7 +27,7 @@ class ProjectTypeController extends Controller
     {
         $project_type_body = Validation::store($request);
         $new_project_type = Service::createProjectType($project_type_body);
-        return response(['project_type'=> $new_project_type], 201);
+        return response(['project_type' => $new_project_type], 201);
     }
 
     /**
@@ -36,7 +36,7 @@ class ProjectTypeController extends Controller
     public function show(string $id)
     {
         $project_type = Service::getProjectById($id);
-        return response(['project_type'=> $project_type]);
+        return response(['project_type' => $project_type]);
     }
 
     /**
@@ -55,6 +55,6 @@ class ProjectTypeController extends Controller
     public function destroy(string $id)
     {
         $project_type = Service::deleteProjectTypeById($id);
-        return response(['project_type' => $project_type]);
+        return response(['message' => 'Delete project type successfully']);
     }
 }
