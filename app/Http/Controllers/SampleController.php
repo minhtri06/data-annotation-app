@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sample;
+use App\Services\SampleService as Service;
+use App\Validation\SampleValidation as Validation;
 use Illuminate\Http\Request;
 
 class SampleController extends Controller
@@ -10,9 +12,11 @@ class SampleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $samples = Sample::all();
+        $user = auth()->user();
+        $query_options = Validation::index($request);
+        $samples = Service::getSamples($query_options, $user);
         return response(['samples' => $samples]);
     }
 
@@ -21,7 +25,7 @@ class SampleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $sample_body = Validation::store($request);
     }
 
     /**
