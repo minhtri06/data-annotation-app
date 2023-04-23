@@ -102,7 +102,7 @@ class ProjectService
             });
         }
 
-        return $project_query->get();
+        return $project_query->orderBy('id', 'desc')->get();
     }
 
     static public function getUnassignUsersOfProject($project_id)
