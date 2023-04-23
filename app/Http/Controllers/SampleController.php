@@ -26,6 +26,8 @@ class SampleController extends Controller
     public function store(Request $request)
     {
         $sample_body = Validation::store($request);
+        $sample = Service::createSample($sample_body);
+        return response(['sample' => $sample], 201);
     }
 
     /**

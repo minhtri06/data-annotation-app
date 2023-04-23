@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Exceptions\ApiException;
+use App\Models\Project;
 use App\Models\Sample;
 
 class SampleService
@@ -23,5 +25,21 @@ class SampleService
         $sample_query->with('sample_texts');
 
         return $sample_query->get();
+    }
+
+    static public function createSample($sample_body)
+    {
+        $project = Project::find($sample_body['project_id']);
+        if ($project == null) {
+            throw ApiException::NotFound("project_id does not exist");
+        }
+        if ($project->number_of_texts != count($sample_body['sample_texts'])) {
+            throw ApiException::BadRequest(
+                "Number of sample_texts is not equal the number_of_text of project"
+            );
+        }
+        $sample = $project->samples()->create([]);
+        $sample->sample_texts()->createMany($sample_body['sample_texts']);
+        return $sample;
     }
 }

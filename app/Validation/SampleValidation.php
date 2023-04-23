@@ -15,8 +15,8 @@ class SampleValidation
     {
         return $request->validate([
             'project_id' => 'required|integer',
-            'texts' => 'required|array',
-            'texts.*' => 'required|string'
+            'sample_texts' => 'required|array',
+            'sample_texts.*.text' => 'required|string'
         ]);
     }
 }
