@@ -13,7 +13,7 @@ class ProjectTypeService
 {
     static public function getAllProjectTypes()
     {
-        return ProjectType::all();
+        return ProjectType::orderBy('id', 'desc')->get();
     }
 
     static public function getProjectById($id)
