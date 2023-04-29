@@ -48,16 +48,24 @@ class SampleService
 
     static private function getLabelSetsForSample($project_id, $sample_id, $user)
     {
-        $label_sets = LabelSet::where('project_id', $project_id)
-            ->with('labels.labeling', function ($query) use ($sample_id, $user) {
-                $query->where('sample_id', $sample_id);
-
-                if ($user->role != 'admin' && $user->role != 'manager') {
+        $label_set_query = LabelSet::where('project_id', $project_id);
+        if ($user->role == 'admin' || $user->role == 'manager') {
+            $label_sets = $label_set_query->with(
+                'labels.performers',
+                function ($query) use ($sample_id) {
+                    $query->wherePivot('sample_id', $sample_id);
+                    $query->select('performer_id', 'name');
+                }
+            )->get();
+        } else {
+            $label_sets = $label_set_query->with(
+                'labels.labeling',
+                function ($query) use ($sample_id, $user) {
+                    $query->where('sample_id', $sample_id);
                     $query->where('performer_id', $user->id);
                 }
-            })->get();
+            )->get();
 
-        if ($user->role != 'admin' && $user->role != 'manager') {
             foreach ($label_sets as $label_set) {
                 $label_set['pick_one'] = $label_set['pick_one'] === 1;
                 foreach ($label_set->labels as $label) {

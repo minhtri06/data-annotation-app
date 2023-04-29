@@ -30,6 +30,12 @@ class Label extends Model
             ->using(Labeling::class)->withTimestamps();
     }
 
+    public function performers()
+    {
+        return $this->belongsToMany(User::class, 'labeling', 'label_id', 'performer_id')
+            ->using(Labeling::class)->withTimestamps()->withPivot('sample_id');
+    }
+
     public function labeling()
     {
         return $this->hasMany(Labeling::class);
