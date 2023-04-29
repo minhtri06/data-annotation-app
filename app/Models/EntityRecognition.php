@@ -24,7 +24,7 @@ class EntityRecognition extends Pivot
         $this->belongsTo(User::class, 'performer_id');
     }
 
-    public function entities()
+    public function entity()
     {
         $this->belongsTo(Entity::class);
     }

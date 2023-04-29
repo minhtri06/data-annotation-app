@@ -33,9 +33,12 @@ class SampleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, Request $request)
     {
-        //
+        $user = auth()->user();
+        $query_options = Validation::show($request);
+        $response = Service::getSampleById($id, $user, $query_options);
+        return response($response);
     }
 
     /**

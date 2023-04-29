@@ -28,7 +28,7 @@ class SampleText extends Model
     public function entities()
     {
         return $this->belongsToMany(Entity::class, 'entity_recognition')
-            ->using(EntityRecognition::class)->withPivot('start')->withPivot('end')
+            ->using(EntityRecognition::class)->withPivot('start', 'end', 'performer_id')
             ->withTimestamps();
     }
 

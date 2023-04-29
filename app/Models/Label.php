@@ -29,4 +29,9 @@ class Label extends Model
         return $this->belongsToMany(Sample::class)
             ->using(Labeling::class)->withTimestamps();
     }
+
+    public function labeling()
+    {
+        return $this->hasMany(Labeling::class);
+    }
 }

@@ -29,6 +29,11 @@ class Sample extends Model
             ->using(Labeling::class)->withPivot('pick_one')->withTimestamps();
     }
 
+    public function labeling()
+    {
+        return $this->hasMany(labeling::class);
+    }
+
     public function sample_texts()
     {
         return $this->hasMany(SampleText::class);
