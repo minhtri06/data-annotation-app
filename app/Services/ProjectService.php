@@ -49,6 +49,8 @@ class ProjectService
     {
         $project_query = Project::query();
 
+        $project_query->with('project_type');
+
         if (array_key_exists('with_samples', $query_options)) {
             $project_query->with('samples', 'samples.sample_texts');
         }
