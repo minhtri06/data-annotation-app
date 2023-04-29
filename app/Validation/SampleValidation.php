@@ -20,6 +20,15 @@ class SampleValidation
         ]);
     }
 
+    static public function update(Request $request)
+    {
+        return $request->validate([
+            'sample_texts' => 'array|required',
+            'sample_texts.*.id' => 'integer|required',
+            'sample_texts.*.text' => 'string|required',
+        ]);
+    }
+
     static public function show(Request $request)
     {
         $fields =  $request->validate([

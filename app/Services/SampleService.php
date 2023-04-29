@@ -73,11 +73,6 @@ class SampleService
         return $label_sets;
     }
 
-    static private function getEntitiesForSample($project_id, $sample_id, $user)
-    {
-        $entities = Entity::where('project_id', $project_id);
-    }
-
     static public function getSampleById($sample_id, $user, $query_options)
     {
         $response = [];
@@ -125,5 +120,32 @@ class SampleService
         }
 
         return $response;
+    }
+
+    public static function updateSampleById($sample_id, $sample_texts)
+    {
+        $sample = Sample::with('sample_texts')->find($sample_id);
+        if ($sample == null) {
+            throw ApiException::NotFound('Sample not found');
+        }
+        for ($i = 0; $i < count($sample->sample_texts); $i++) {
+            if ($sample->sample_texts[$i]->id != $sample_texts[$i]['id']) {
+                throw ApiException::BadRequest('Sample text ids is not match');
+            }
+            $sample->sample_texts[$i]->text = $sample_texts[$i]['text'];
+        }
+        foreach ($sample->sample_texts as $sample_text) {
+            $sample_text->save();
+        }
+        return $sample;
+    }
+
+    public static function deleteSampleById($sample_id)
+    {
+        $sample = Sample::query()->find($sample_id);
+        if ($sample == null) {
+            throw ApiException::NotFound('Sample not found');
+        }
+        $sample->delete();
     }
 }

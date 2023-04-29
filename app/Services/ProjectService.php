@@ -51,12 +51,12 @@ class ProjectService
 
         $project_query->with('project_type');
 
-        if (array_key_exists('with_samples', $query_options)) {
+        if ($query_options['with_samples'] ?? false) {
             $project_query->with('samples', 'samples.sample_texts');
         }
 
         if (
-            (array_key_exists('with_assigned_users', $query_options)) &&
+            ($query_options['with_assigned_users'] ?? false) &&
             ($user->role == 'manager' || $user->role == 'admin')
         ) {
             $project_query->with('assigned_users');
@@ -92,7 +92,7 @@ class ProjectService
         }
 
         if (
-            (array_key_exists('with_assigned_users', $query_options)) &&
+            ($query_options['with_assigned_users'] ?? false) &&
             ($user->role == 'manager' || $user->role == 'admin')
         ) {
             $project_query->with('assigned_users');

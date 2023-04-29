@@ -46,7 +46,9 @@ class SampleController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        ['sample_texts' => $sample_texts] = Validation::update($request);
+        $sample = Service::updateSampleById($id, $sample_texts);
+        return response(['sample' => $sample]);
     }
 
     /**
@@ -54,6 +56,7 @@ class SampleController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        Service::deleteSampleById($id);
+        return response([], 204);
     }
 }
