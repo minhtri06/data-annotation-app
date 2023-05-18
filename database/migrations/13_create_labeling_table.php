@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('performer_id')->nullable()->constrained('users')
                 ->onDelete('set null');
             $table->timestamps();
+            $table->unique(['label_id', 'sample_id', 'performer_id']);
         });
     }
 

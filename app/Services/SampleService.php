@@ -5,9 +5,13 @@ namespace App\Services;
 use App\Exceptions\ApiException;
 use App\Models\Assignment;
 use App\Models\Entity;
+use App\Models\EntityRecognition;
+use App\Models\GeneratedText;
+use App\Models\Labeling;
 use App\Models\LabelSet;
 use App\Models\Project;
 use App\Models\Sample;
+use App\Models\SampleText;
 
 class SampleService
 {
@@ -155,5 +159,125 @@ class SampleService
             throw ApiException::NotFound('Sample not found');
         }
         $sample->delete();
+    }
+
+    private static function entityRecognize(
+        $sample_id,
+        $project_id,
+        $performer_id,
+        $entity_recognition
+    ) {
+        $project_entity_ids = Entity::where('project_id', $project_id)->pluck('id')
+            ->toArray();
+        $sample_text_ids = SampleText::where('sample_id', $sample_id)->pluck('id')
+            ->toArray();
+        foreach ($entity_recognition as $er) {
+            if (!in_array($er['entity_id'], $project_entity_ids)) {
+                throw ApiException::BadRequest(
+                    "entity id {$er['entity_id']} is not belong to the sample's project"
+                );
+            }
+            if (!in_array($er['sample_text_id'], $sample_text_ids)) {
+                throw ApiException::BadRequest(
+                    "sample text id {$er['sample_text_id']} is not belong to the sample"
+                );
+            }
+        }
+        foreach ($entity_recognition as $er) {
+            $er['performer_id'] = $performer_id;
+            EntityRecognition::create($er);
+        }
+    }
+
+    public static function addGeneratedTexts($sample_id, $performer_id, $generated_texts)
+    {
+        if (GeneratedText::where([
+            'sample_id' => $sample_id, 'performer_id' => $performer_id
+        ])->exists()) {
+            throw ApiException::BadRequest('Sample already has generated texts');
+        }
+        foreach ($generated_texts as $gen_text) {
+            GeneratedText::create([
+                'text' => $gen_text,
+                'performer_id' => $performer_id,
+                'sample_id' => $sample_id
+            ]);
+        }
+    }
+
+    public static function labeling($sample_id, $project_id, $performer_id, $labeling)
+    {
+        if (Labeling::where([
+            'sample_id' => $sample_id, 'performer_id' => $performer_id
+        ])->exists()) {
+            throw ApiException::BadRequest('Sample already has labeling');
+        }
+        $add_labeling = [];
+        foreach ($labeling as $label_set_id => $label_ids) {
+            $label_set = LabelSet::find($label_set_id);
+            if ($label_set->pick_one && count($label_ids) > 1) {
+                throw ApiException::BadRequest('Label set ' . $label_set_id . ' is pick one');
+            }
+            $allowed_label_ids = $label_set->labels->pluck('id')->toArray();
+            foreach ($label_ids as $label_id) {
+                if (!in_array($label_id, $allowed_label_ids)) {
+                    throw ApiException::BadRequest('Label id ' . $label_id . ' is not allowed');
+                }
+                $add_labeling[] = [
+                    'performer_id' => $performer_id,
+                    'label_id' => $label_id,
+                    'sample_id' => $sample_id
+                ];
+            }
+        }
+        foreach ($add_labeling as $al) {
+            Labeling::create($al);
+        }
+    }
+
+    public static function annotateSample($sample_id, $annotation_body, $user)
+    {
+        $sample_query = Sample::with('project')->where('id', $sample_id);
+        if ($user->role != 'admin') {
+            $sample_query->whereHas('project.assignment', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            });
+        }
+        $sample = $sample_query->first();
+        if ($sample == null) {
+            throw ApiException::NotFound('Sample not found');
+        }
+        if (array_key_exists('entity_recognition', $annotation_body)) {
+            if (!$sample->project->has_entity_recognition) {
+                throw ApiException::BadRequest('Sample does not allow entity recognition');
+            }
+            SampleService::entityRecognize(
+                $sample->id,
+                $sample->project_id,
+                $user->id,
+                $annotation_body['entity_recognition']
+            );
+        }
+        if (array_key_exists('generated_texts', $annotation_body)) {
+            if (!$sample->project->has_generated_text) {
+                throw ApiException::BadRequest('Sample does not allow generated text');
+            }
+            SampleService::addGeneratedTexts(
+                $sample->id,
+                $user->id,
+                $annotation_body['generated_texts']
+            );
+        }
+        if (array_key_exists('labeling', $annotation_body)) {
+            if (!$sample->project->has_label_sets) {
+                throw ApiException::BadRequest('Sample does not allow labeling');
+            }
+            SampleService::labeling(
+                $sample->id,
+                $sample->project_id,
+                $user->id,
+                $annotation_body['labeling']
+            );
+        }
     }
 }

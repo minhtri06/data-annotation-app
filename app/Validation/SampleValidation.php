@@ -42,4 +42,28 @@ class SampleValidation
             'with_generated_texts' => ($fields['with_generated_texts'] ?? 'false') === 'true',
         ];
     }
+
+    static public function annotateSample(Request $request)
+    {
+        $rules = [];
+        if (array_key_exists('entity_recognition', $request->all())) {
+            $rules['entity_recognition'] = 'array|required';
+            $rules['entity_recognition.*.sample_text_id'] = 'integer|required';
+            $rules['entity_recognition.*.entity_id'] = 'integer|required';
+            $rules['entity_recognition.*.start'] = 'integer|required';
+            $rules['entity_recognition.*.end'] = 'integer|required';
+        }
+        if (array_key_exists('generated_texts', $request->all())) {
+            $rules['generated_texts'] = 'array|required';
+            $rules['generated_texts.*'] = 'string|required';
+        }
+        if (array_key_exists('labeling', $request->all())) {
+            // Keys are label_set_id
+            // Values are corresponding label_ids
+            $rules['labeling'] = 'array|required';
+            $rules['labeling.*'] = 'array|required';
+        }
+
+        return $request->validate($rules);
+    }
 }

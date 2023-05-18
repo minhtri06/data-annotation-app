@@ -59,4 +59,12 @@ class SampleController extends Controller
         Service::deleteSampleById($id);
         return response([], 204);
     }
+
+    public function annotateSample(string $id, Request $request)
+    {
+        $annotation_body =  Validation::annotateSample($request);
+        $user = auth()->user();
+        $sample = Service::annotateSample($id, $annotation_body, $user);
+        return $sample;
+    }
 }
