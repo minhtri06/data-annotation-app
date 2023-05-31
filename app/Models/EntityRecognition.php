@@ -21,16 +21,16 @@ class EntityRecognition extends Pivot
 
     public function user()
     {
-        $this->belongsTo(User::class, 'performer_id');
+        return $this->belongsTo(User::class, 'performer_id');
     }
 
     public function entity()
     {
-        $this->belongsTo(Entity::class);
+        return $this->belongsTo(Entity::class);
     }
 
-    public function sample_texts()
+    public function sample_text()
     {
-        $this->belongsTo(SampleText::class);
+        return $this->belongsTo(SampleText::class);
     }
 }

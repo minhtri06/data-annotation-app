@@ -167,6 +167,13 @@ class SampleService
         $performer_id,
         $entity_recognition
     ) {
+        // Delete entity recognition of this performer for this sample if it exists
+        EntityRecognition::where([
+            'performer_id' => $performer_id
+        ])->whereHas('sample_text', function ($query) use ($sample_id) {
+            $query->where(['sample_id' => $sample_id]);
+        })->delete();
+
         $project_entity_ids = Entity::where('project_id', $project_id)->pluck('id')
             ->toArray();
         $sample_text_ids = SampleText::where('sample_id', $sample_id)->pluck('id')
@@ -191,11 +198,11 @@ class SampleService
 
     public static function addGeneratedTexts($sample_id, $performer_id, $generated_texts)
     {
-        if (GeneratedText::where([
+        // Delete previous generated texts of this performer for this sample if it exists
+        GeneratedText::where([
             'sample_id' => $sample_id, 'performer_id' => $performer_id
-        ])->exists()) {
-            throw ApiException::BadRequest('Sample already has generated texts');
-        }
+        ])->delete();
+
         foreach ($generated_texts as $gen_text) {
             GeneratedText::create([
                 'text' => $gen_text,
@@ -207,17 +214,20 @@ class SampleService
 
     public static function labeling($sample_id, $project_id, $performer_id, $labeling)
     {
-        if (Labeling::where([
+        // Delete labeling of this performer for this sample if it exists
+        Labeling::where([
             'sample_id' => $sample_id, 'performer_id' => $performer_id
-        ])->exists()) {
-            throw ApiException::BadRequest('Sample already has labeling');
-        }
+        ])->delete();
+
         $add_labeling = [];
         foreach ($labeling as $label_set_id => $label_ids) {
             $label_set = LabelSet::find($label_set_id);
+
+            // Check pick one 
             if ($label_set->pick_one && count($label_ids) > 1) {
                 throw ApiException::BadRequest('Label set ' . $label_set_id . ' is pick one');
             }
+
             $allowed_label_ids = $label_set->labels->pluck('id')->toArray();
             foreach ($label_ids as $label_id) {
                 if (!in_array($label_id, $allowed_label_ids)) {
@@ -230,6 +240,7 @@ class SampleService
                 ];
             }
         }
+
         foreach ($add_labeling as $al) {
             Labeling::create($al);
         }
