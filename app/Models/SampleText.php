@@ -34,6 +34,6 @@ class SampleText extends Model
 
     public function entity_recognition()
     {
-        $this->hasMany(EntityRecognition::class);
+        return $this->hasMany(EntityRecognition::class);
     }
 }
