@@ -16,6 +16,9 @@ class ProjectService
             throw ApiException::NotFound("Project not found");
         }
         try {
+            if ($project->assigned_users()->count() + count($user_ids) > $project->maximum_performer) {
+                throw ApiException::BadRequest('Assignment exceed maximum of performer');
+            }
             $project->assigned_users()->attach($user_ids);
         } catch (QueryException $exception) {
             throw ApiException::BadRequest($exception->errorInfo[2]);
