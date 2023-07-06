@@ -52,4 +52,24 @@ class AuthController extends Controller
         $user->tokens()->delete();
         return response()->noContent();
     }
+
+    public function resetPassword(Request $request)
+    {
+        /** @var \App\Models\User $user **/
+        $user = auth()->user();
+
+        $request->validate([
+            'old_password' => 'required|string',
+            'new_password' => 'required|string ',
+        ]);
+
+        if (!Hash::check($request->old_password, $user->password)) {
+            throw ApiException::Unauthorized('Wrong password');
+        }
+
+        $user->password = bcrypt($request->new_password);
+        $user->save();
+
+        return response(['message' => 'Reset password successfully']);
+    }
 }
