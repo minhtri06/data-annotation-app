@@ -25,3 +25,6 @@ Route::middleware(['auth:sanctum', 'ability:manager,admin'])
         '/{id}/un-assignment',
         [ProjectController::class, 'getUnassignedUsers']
     );
+
+Route::middleware(['auth:sanctum', 'ability:manager,admin'])
+    ->post('/{id}/files', [ProjectController::class, 'importFile']);

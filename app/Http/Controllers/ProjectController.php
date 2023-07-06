@@ -6,6 +6,7 @@ use App\Exceptions\ApiException;
 use Illuminate\Http\Request;
 
 use App\Services\ProjectService as Service;
+use App\Services\SampleService;
 
 use App\Validation\ProjectValidation as Validation;
 
@@ -74,5 +75,35 @@ class ProjectController extends Controller
     {
         $unassignedUsers = Service::getUnassignUsersOfProject($project_id);
         return response(['unassigned_users' => $unassignedUsers]);
+    }
+
+    private function readCSV($filePath)
+    {
+        $file = fopen($filePath, 'r');
+
+        $header = fgetcsv($file);
+
+        $data = [];
+        while ($row = fgetcsv($file)) {
+            $data[] = array_combine($header, $row);
+        }
+
+        fclose($file);
+
+        return $data;
+    }
+
+    public function importFile(Request $request, $project_id)
+    {
+        $data = $this->readCSV($request->file('file')->getPathname());
+        foreach ($data as $texts) {
+            $body = ['project_id' => $project_id];
+            $body['sample_texts'] = [];
+            foreach ($texts as $text) {
+                $body['sample_texts'][] = ['text' => $text];
+            }
+            SampleService::createSample($body);
+        }
+        return response(['message' => 'Import file successfully']);
     }
 }

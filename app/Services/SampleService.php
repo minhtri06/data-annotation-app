@@ -249,15 +249,18 @@ class SampleService
     public static function annotateSample($sample_id, $annotation_body, $user)
     {
         $sample_query = Sample::with('project')->where('id', $sample_id);
+
         if ($user->role != 'admin') {
             $sample_query->whereHas('project.assignment', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
         }
+
         $sample = $sample_query->first();
         if ($sample == null) {
             throw ApiException::NotFound('Sample not found');
         }
+
         if (array_key_exists('entity_recognition', $annotation_body)) {
             if (!$sample->project->has_entity_recognition) {
                 throw ApiException::BadRequest('Sample does not allow entity recognition');
@@ -269,6 +272,7 @@ class SampleService
                 $annotation_body['entity_recognition']
             );
         }
+
         if (array_key_exists('generated_texts', $annotation_body)) {
             if (!$sample->project->has_generated_text) {
                 throw ApiException::BadRequest('Sample does not allow generated text');
@@ -279,6 +283,7 @@ class SampleService
                 $annotation_body['generated_texts']
             );
         }
+
         if (array_key_exists('labeling', $annotation_body)) {
             if (!$sample->project->has_label_sets) {
                 throw ApiException::BadRequest('Sample does not allow labeling');
