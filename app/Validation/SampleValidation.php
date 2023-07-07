@@ -65,6 +65,7 @@ class SampleValidation
             $rules['labeling'] = 'array|required';
             $rules['labeling.*'] = 'array|required';
         }
+        $rules['user_id'] = 'integer';
 
         return $request->validate($rules);
     }
