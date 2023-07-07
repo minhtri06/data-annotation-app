@@ -64,7 +64,7 @@ class SampleController extends Controller
     {
         $annotation_body =  Validation::annotateSample($request);
         $user = auth()->user();
-        $sample = Service::annotateSample($id, $annotation_body, $user);
-        return $sample;
+        Service::annotateSample($id, $annotation_body, $user);
+        return response([], 204);
     }
 }

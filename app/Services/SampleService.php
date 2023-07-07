@@ -264,7 +264,7 @@ class SampleService
         } else {
             $user_id = $annotation_body['user_id'] ?? null;
             if ($user_id == null) {
-                throw ApiException::BadRequest('userId is required');
+                return;
             }
         }
 
