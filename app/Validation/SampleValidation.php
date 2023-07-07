@@ -35,11 +35,13 @@ class SampleValidation
             'with_label_sets' => 'string',
             'with_entities' => 'string',
             'with_generated_texts' => 'string',
+            'performer_id' => 'integer'
         ]);
         return [
             'with_label_sets' => ($fields['with_label_sets'] ?? 'false') === 'true',
             'with_entities' => ($fields['with_entities'] ?? 'false') === 'true',
             'with_generated_texts' => ($fields['with_generated_texts'] ?? 'false') === 'true',
+            'performer_id' => $fields['performer_id'] ?? null
         ];
     }
 

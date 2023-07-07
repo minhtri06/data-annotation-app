@@ -50,23 +50,19 @@ class SampleService
         return $sample;
     }
 
-    static private function getLabelSetsForSample($project_id, $sample_id, $user)
+    static private function getLabelSetsForSample($project_id, $sample_id, $performer_id)
     {
         $label_set_query = LabelSet::where('project_id', $project_id);
-        if ($user->role == 'admin' || $user->role == 'manager') {
+        if ($performer_id == null) {
             $label_sets = $label_set_query->with(
-                'labels.performers',
-                function ($query) use ($sample_id) {
-                    $query->wherePivot('sample_id', $sample_id);
-                    $query->select('performer_id', 'name');
-                }
+                'labels'
             )->get();
         } else {
             $label_sets = $label_set_query->with(
                 'labels.labeling',
-                function ($query) use ($sample_id, $user) {
+                function ($query) use ($sample_id, $performer_id) {
                     $query->where('sample_id', $sample_id);
-                    $query->where('performer_id', $user->id);
+                    $query->where('performer_id', $performer_id);
                 }
             )->get();
 
@@ -81,7 +77,6 @@ class SampleService
                 }
             }
         }
-
         return $label_sets;
     }
 
@@ -90,18 +85,28 @@ class SampleService
         $response = [];
         $sample_query = Sample::query()->where('id', $sample_id)->with('sample_texts');
 
+        $performer_id = null;
+        if ($user->role == 'annotator') {
+            $performer_id = $user->id;
+        } else {
+            $performer_id = $query_options['performer_id'] ?? null;
+        }
+
         if ($query_options['with_entities']) {
-            $sample_query->with('sample_texts.entities', function ($query) use ($user) {
-                if ($user->role != 'admin' && $user->role != 'manager') {
-                    $query->wherePivot('performer_id', $user->id);
+            $sample_query->with(
+                'sample_texts.entities',
+                function ($query) use ($performer_id) {
+                    if ($performer_id != null) {
+                        $query->wherePivot('performer_id', $performer_id);
+                    }
                 }
-            });
+            );
         }
 
         if ($query_options['with_generated_texts']) {
-            $sample_query->with('generated_texts', function ($query) use ($user) {
-                if ($user->role != 'admin' && $user->role != 'manager') {
-                    $query->where('performer_id', $user->id);
+            $sample_query->with('generated_texts', function ($query) use ($performer_id) {
+                if ($performer_id != null) {
+                    $query->where('performer_id', $performer_id);
                 }
             });
         }
@@ -122,7 +127,7 @@ class SampleService
             $response['label_sets'] = SampleService::getLabelSetsForSample(
                 $sample->project_id,
                 $sample_id,
-                $user
+                $performer_id
             );
         }
 
