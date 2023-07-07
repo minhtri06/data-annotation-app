@@ -16,5 +16,5 @@ Route::middleware(['auth:sanctum', 'ability:manager,admin'])
 Route::middleware(['auth:sanctum', 'ability:manager,admin'])
     ->delete('/{id}', [Controller::class, 'destroy']);
 
-Route::middleware(['auth:sanctum', 'ability:annotator,admin'])
+Route::middleware(['auth:sanctum'])
     ->post('/{id}/annotation', [Controller::class, 'annotateSample']);

@@ -250,10 +250,17 @@ class SampleService
     {
         $sample_query = Sample::with('project')->where('id', $sample_id);
 
-        if ($user->role != 'admin') {
+        $user_id = null;
+        if ($user->role == 'annotator') {
             $sample_query->whereHas('project.assignment', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
+            $user_id = $user->id;
+        } else {
+            $user_id = $annotation_body['user_id'] ?? null;
+            if ($user_id == null) {
+                throw ApiException::BadRequest('userId is required');
+            }
         }
 
         $sample = $sample_query->first();
@@ -268,7 +275,7 @@ class SampleService
             SampleService::entityRecognize(
                 $sample->id,
                 $sample->project_id,
-                $user->id,
+                $user_id,
                 $annotation_body['entity_recognition']
             );
         }
@@ -279,7 +286,7 @@ class SampleService
             }
             SampleService::addGeneratedTexts(
                 $sample->id,
-                $user->id,
+                $user_id,
                 $annotation_body['generated_texts']
             );
         }
@@ -291,7 +298,7 @@ class SampleService
             SampleService::labeling(
                 $sample->id,
                 $sample->project_id,
-                $user->id,
+                $user_id,
                 $annotation_body['labeling']
             );
         }
